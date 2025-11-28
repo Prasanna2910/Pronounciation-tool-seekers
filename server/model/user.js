@@ -11,8 +11,15 @@ const signupSchema = new mongoose.Schema({
     },
     password: { 
         type: String,
-        required: true
+    },
+    tests: {
+        type: Array,
+        default: []
+    },
+    level: {
+        type: Number,
+        default: 1
     }
 });
 
-module.exports = mongoose.model("Signup", signupSchema);
+module.exports = mongoose.model("user", signupSchema);

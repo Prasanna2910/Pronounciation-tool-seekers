@@ -2,19 +2,19 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 require("dotenv").config();
-const Signup = require("./models/Signup");
 const cors = require("cors");
-const route = require("./routes/route");
+const route = require("./routes/user");
 
 app.use(express.json());
 app.use(cors());
-app.use("/api",route);
+app.use("/user",route);
+app.use("/test",require("./routes/test"));
 
 console.log(route);
 
 const PORT = process.env.PORT || 5000;
 
-mongoose.connect(process.env.MONGO_URI)
+mongoose.connect(process.env.MONGO)
 .then(()=>{
     console.log("Connected to MongoDB");
 })
