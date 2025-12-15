@@ -4,6 +4,7 @@ import LandingPage from "./components/landingPage.jsx";
 import TeacherLoginPage from "./components/TeacherLoginPage.jsx";
 import AdminLoginPage from "./components/AdminLoginPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
+import LevelsPage from "./components/levelsPage.jsx";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/teacherlogin" element={<TeacherLoginPage />} />
         <Route path="/adminlogin" element={<AdminLoginPage />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
+        <Route path="/levelsPage" element={<LevelsPage />} />
       </Routes>
     </Router>
   );
