@@ -5,6 +5,7 @@ import TeacherLoginPage from "./components/TeacherLoginPage.jsx";
 import AdminLoginPage from "./components/AdminLoginPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
 import LevelsPage from "./components/levelsPage.jsx";
+import TestTakingPage from "./components/testTakingPage.jsx";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/adminlogin" element={<AdminLoginPage />} />
         <Route path="/admindashboard" element={<AdminDashboard />} />
         <Route path="/levelsPage" element={<LevelsPage />} />
+        <Route path="/testTakingPage" element={<TestTakingPage/>}></Route>
       </Routes>
     </Router>
   );
