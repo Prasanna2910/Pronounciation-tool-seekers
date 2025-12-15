@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 
-export default function TeacherLoginPage() {
+export default function AdminLoginPage() {
   const [mode, setMode] = useState("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -39,7 +39,7 @@ export default function TeacherLoginPage() {
           Login
         </h2>
         <p className="text-gray-500 text-lg mb-4">
-          Improve your reading skills with timed comprehension tests
+          Access the admin dashboard to view all teacher progress
         </p>
 
         <div
