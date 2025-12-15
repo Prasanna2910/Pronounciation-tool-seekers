@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FiLogOut, FiUser, FiCalendar } from "react-icons/fi";
-import { AiOutlineAreaChart } from "react-icons/ai";
+import { useNavigate } from "react-router-dom";
+import { IoArrowBack } from "react-icons/io5";
 
 export default function AdminDashboard() {
   // sample teachers data
@@ -57,6 +58,7 @@ export default function AdminDashboard() {
   ];
 
   const [selectedId, setSelectedId] = useState(null);
+  const navigate = useNavigate();
 
   const totalTeachers = teachers.length;
   const totalDays = teachers.reduce((sum, t) => sum + t.daysCompleted, 0);
@@ -70,198 +72,225 @@ export default function AdminDashboard() {
   const selected = teachers.find((t) => t.id === selectedId) || null;
 
   return (
-    <div className="min-h-screen bg-gray-50 px-4 sm:px-6 lg:px-12 xl:px-50 pt-6 sm:pt-10">
-      {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-        <div className="text-center sm:text-left">
-          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
-            Admin Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">
-            Monitor all teachers' progress and performance
-          </p>
-        </div>
-        <div className="flex justify-center sm:justify-end">
-          <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-md shadow-sm text-sm text-gray-700 hover:bg-gray-50 w-full sm:w-auto justify-center">
-            <FiLogOut /> Logout
-          </button>
-        </div>
-      </header>
-
-      {/* Top metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
-        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500">Total Teachers</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-900">
-            {totalTeachers}
+    <div>
+      <button
+          type="button"
+          onClick={() => navigate(-1)}
+          aria-label="Go back"
+          className="absolute top-4 left-4 p-2 rounded-full bg-white shadow-sm hover:bg-gray-100 focus:outline-none cursor-pointer"
+        >
+          <IoArrowBack className="text-xl text-gray-700" />
+        </button>
+      <div className="min-h-screen bg-gray-50 p-4 mt-10 md:p-6 lg:pl-30 lg:pr-30">
+        {/* Header */}
+        <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 lg:mb-8 gap-4">
+          <div className="text-center md:text-left">
+            <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-base md:text-lg lg:text-xl text-gray-500 mt-1">
+              Monitor all teachers' progress and performance
+            </p>
           </div>
-        </div>
-
-        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500">Total Days Completed</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-900">
-            {totalDays}
+          <div className="flex justify-center md:justify-end">
+            <button className="flex items-center gap-2 px-4 py-2 bg-white rounded-md shadow-sm text-sm md:text-base text-gray-700 hover:bg-gray-50 w-full md:w-auto justify-center transition-all duration-200">
+              <FiLogOut /> Logout
+            </button>
           </div>
-        </div>
+        </header>
 
-        <div className="bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-          <div className="text-sm text-gray-500">Average Score</div>
-          <div className="mt-1 sm:mt-2 text-xl sm:text-2xl font-semibold text-gray-900">
-            {avgScore}
-          </div>
-        </div>
-      </div>
-
-      {/* Main content: left teachers, right details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-        {/* Teachers Overview */}
-        <div className="lg:col-span-1 bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-          <h3 className="text-sm font-medium text-gray-700 mb-1">
-            Teachers Overview
-          </h3>
-          <p className="text-xs text-gray-400 mb-4">
-            Click on a teacher to view detailed progress
-          </p>
-
-          <div className="space-y-3 sm:space-y-4">
-            {teachers.map((t) => {
-              const isSelected = t.id === selectedId;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedId(t.id)}
-                  className={`w-full text-left p-3 sm:p-4 rounded-lg border transition flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 ${
-                    isSelected
-                      ? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200"
-                      : "bg-white border-gray-100 hover:shadow-sm"
-                  }`}
-                >
-                  <div className="flex-1">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {t.name}
-                    </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {t.daysCompleted} days completed
-                    </div>
-                    <div className="inline-block mt-2 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                      {t.level} {t.levelProgress}/{t.levelTotal}
-                    </div>
-                  </div>
-
-                  <div className="text-sm font-semibold text-indigo-600 sm:self-start">
-                    {t.avgScore}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Right side: select teacher or details */}
-        <div className="lg:col-span-1 bg-white rounded-lg p-4 sm:p-6 shadow-sm border border-gray-100">
-          {!selected ? (
-            <div className="h-48 sm:h-64 flex flex-col items-center justify-center text-center text-gray-400">
-              <FiUser className="text-3xl sm:text-4xl mb-3" />
-              <div className="text-sm px-2">
-                Select a teacher from the list to view their details
-              </div>
+        {/* Top metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 lg:mb-8">
+          <div className="bg-white rounded-lg p-4 md:p-5 lg:p-6 shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
+            <div className="text-sm md:text-base text-gray-500">
+              Total Teachers
             </div>
-          ) : (
-            <div className="space-y-4 sm:space-y-6">
-              <div>
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h4 className="text-base sm:text-lg font-semibold text-gray-900">
-                      {selected.name}'s Details
-                    </h4>
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      View test history and feedback
-                    </p>
-                  </div>
-                </div>
+            <div className="mt-2 text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900">
+              {totalTeachers}
+            </div>
+          </div>
 
-                <div className="mt-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded-full">
-                        {selected.level}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-700">
-                      Progress
-                    </span>
-                    <div className="text-sm font-medium text-gray-800">
-                      {selected.levelProgress} / {selected.levelTotal} days
-                    </div>
-                  </div>
+          <div className="bg-white rounded-lg p-4 md:p-5 lg:p-6 shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
+            <div className="text-sm md:text-base text-gray-500">
+              Total Days Completed
+            </div>
+            <div className="mt-2 text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900">
+              {totalDays}
+            </div>
+          </div>
 
-                  <div className="w-full">
-                    <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">
-                      <div
-                        className="h-2 sm:h-3 rounded-full bg-purple-600"
-                        style={{
-                          width: `${
-                            (selected.levelProgress / selected.levelTotal) * 100
-                          }%`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
+          <div className="bg-white rounded-lg p-4 md:p-5 lg:p-6 shadow-sm border border-gray-100 transition-all duration-200 hover:shadow-md">
+            <div className="text-sm md:text-base text-gray-500">
+              Average Score
+            </div>
+            <div className="mt-2 text-2xl md:text-3xl lg:text-4xl font-semibold text-gray-900">
+              {avgScore}
+            </div>
+          </div>
+        </div>
 
-                <div className="mt-4 sm:mt-6 space-y-4">
-                  <h5 className="text-sm font-medium text-gray-700">
-                    Recent Tests
-                  </h5>
-                  <div className="space-y-3 max-h-60 sm:max-h-80 overflow-y-auto pr-1 sm:pr-2">
-                    {selected.tests.map((test) => (
-                      <div
-                        key={test.id}
-                        className="border border-gray-100 rounded-md p-3 bg-white shadow-sm"
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 sm:gap-3 text-sm text-gray-600">
-                            <FiCalendar className="flex-shrink-0" />
-                            <div className="min-w-0">
-                              <div className="font-semibold text-sm truncate">
-                                {test.title}
-                              </div>
-                              <div className="text-xs text-gray-400 truncate">
-                                {test.date}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+        {/* Main content: left teachers, right details */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Teachers Overview */}
+          <div className="lg:col-span-1 bg-white rounded-lg p-4 md:p-5 lg:p-6 shadow-sm border border-gray-100">
+            <h3 className="text-base md:text-lg font-medium text-gray-700 mb-1">
+              Teachers Overview
+            </h3>
+            <p className="text-xs md:text-sm text-gray-400 mb-4">
+              Click on a teacher to view detailed progress
+            </p>
 
-                        <div className="grid grid-cols-3 gap-2 sm:gap-4 text-sm text-gray-600 mb-3">
-                          <div className="text-center sm:text-left">
-                            <div className="text-xs text-gray-400">Speed</div>
-                            <div className="font-medium text-xs sm:text-sm">{test.speed}</div>
-                          </div>
-                          <div className="text-center sm:text-left">
-                            <div className="text-xs text-gray-400">Quiz</div>
-                            <div className="font-medium text-xs sm:text-sm">{test.quiz}</div>
-                          </div>
-                          <div className="text-center sm:text-left">
-                            <div className="text-xs text-gray-400">Score</div>
-                            <div className="font-semibold text-indigo-600 text-xs sm:text-sm">
-                              {test.score}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="text-xs sm:text-sm text-gray-700 bg-gray-50 p-2 sm:p-3 rounded">
-                          {test.note}
-                        </div>
+            <div className="space-y-3 md:space-y-4">
+              {teachers.map((t) => {
+                const isSelected = t.id === selectedId;
+                return (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedId(t.id)}
+                    className={`w-full text-left p-3 md:p-4 rounded-lg border transition-all duration-200 flex flex-col md:flex-row md:justify-between md:items-start gap-2 ${
+                      isSelected
+                        ? "bg-indigo-50 border-indigo-300 ring-2 ring-indigo-200 transform scale-[1.02]"
+                        : "bg-white border-gray-100 hover:shadow-md hover:border-indigo-100"
+                    }`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm md:text-base font-semibold text-gray-900 truncate">
+                        {t.name}
                       </div>
-                    ))}
+                      <div className="text-xs md:text-sm text-gray-500 mt-1">
+                        {t.daysCompleted} days completed
+                      </div>
+                      <div className="inline-block mt-2 text-xs md:text-sm bg-green-100 text-green-700 px-2 md:px-3 py-1 rounded-full">
+                        {t.level} {t.levelProgress}/{t.levelTotal}
+                      </div>
+                    </div>
+
+                    <div className="text-sm md:text-base font-semibold text-indigo-600 md:self-start whitespace-nowrap">
+                      {t.avgScore}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right side: select teacher or details */}
+          <div className="lg:col-span-1 bg-white rounded-lg p-4 md:p-5 lg:p-6 shadow-sm border border-gray-100 min-h-[400px]">
+            {!selected ? (
+              <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 p-4">
+                <FiUser className="text-4xl md:text-5xl lg:text-6xl mb-4 text-gray-300" />
+                <div className="text-sm md:text-base lg:text-lg text-gray-500">
+                  Select a teacher from the list to view their details
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 md:space-y-6 h-full">
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div className="min-w-0">
+                      <h4 className="text-lg md:text-xl lg:text-2xl font-semibold text-gray-900 truncate">
+                        {selected.name}'s Details
+                      </h4>
+                      <p className="text-sm md:text-base text-gray-500 truncate">
+                        View test history and feedback
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-3 md:p-4 bg-gray-50 rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs md:text-sm text-green-700 bg-green-100 px-2 md:px-3 py-1 rounded-full">
+                          {selected.level}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm md:text-base font-medium text-gray-700">
+                        Progress
+                      </span>
+                      <div className="text-sm md:text-base font-medium text-gray-800">
+                        {selected.levelProgress} / {selected.levelTotal} days
+                      </div>
+                    </div>
+
+                    <div className="w-full">
+                      <div className="w-full bg-gray-200 rounded-full h-2 md:h-3">
+                        <div
+                          className="h-2 md:h-3 rounded-full bg-purple-600 transition-all duration-500"
+                          style={{
+                            width: `${
+                              (selected.levelProgress / selected.levelTotal) *
+                              100
+                            }%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 md:mt-6 space-y-4">
+                    <h5 className="text-sm md:text-base font-medium text-gray-700">
+                      Recent Tests
+                    </h5>
+                    <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-1 md:pr-2">
+                      {selected.tests.map((test) => (
+                        <div
+                          key={test.id}
+                          className="border border-gray-100 rounded-lg p-3 md:p-4 bg-white shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base text-gray-600 min-w-0">
+                              <FiCalendar className="flex-shrink-0" />
+                              <div className="min-w-0">
+                                <div className="font-semibold text-sm md:text-base truncate">
+                                  {test.title}
+                                </div>
+                                <div className="text-xs md:text-sm text-gray-400 truncate">
+                                  {test.date}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-3 md:gap-4 text-sm md:text-base text-gray-600 mb-3">
+                            <div>
+                              <div className="text-xs md:text-sm text-gray-400">
+                                Speed
+                              </div>
+                              <div className="font-medium text-sm md:text-base truncate">
+                                {test.speed}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs md:text-sm text-gray-400">
+                                Quiz
+                              </div>
+                              <div className="font-medium text-sm md:text-base truncate">
+                                {test.quiz}
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs md:text-sm text-gray-400">
+                                Score
+                              </div>
+                              <div className="font-semibold text-indigo-600 text-sm md:text-base truncate">
+                                {test.score}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-xs md:text-sm text-gray-700 bg-gray-50 p-2 md:p-3 rounded-lg">
+                            {test.note}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

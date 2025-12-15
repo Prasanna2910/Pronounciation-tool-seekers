@@ -16,7 +16,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center bg-gray-50 font-sans">
+    <div>
+      <div className="min-h-screen relative flex items-center justify-center bg-gray-50 font-sans">
       {/* Back button (top-left) */}
       <button
         type="button"
@@ -115,11 +116,13 @@ export default function AdminLoginPage() {
           <button
             className="mt-4 cursor-pointer w-full py-2 rounded-lg text-white font-semibold bg-[#6366f1] shadow-md"
             type="submit"
+            onClick={() => navigate("/admindashboard")}
           >
             {mode === "login" ? "Login" : "Sign Up"}
           </button>
         </form>
       </div>
+    </div>
     </div>
   );
 }
