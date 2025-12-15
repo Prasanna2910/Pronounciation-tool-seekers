@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { FiBookOpen, FiLogOut, FiZap, FiAward, FiLock, FiBarChart2, FiCalendar } from 'react-icons/fi';
 import { FaCrown } from 'react-icons/fa';
+import LevelCalendar from './LevelCalendar';
+import ProgressDashboard from './ProgressDashboard'; 
 
 // Placeholder helpers (replace with your actual data logic)
 const getTeacherProgress = (user) => ({
@@ -15,14 +17,6 @@ const getTeacherProgress = (user) => ({
 const isLevelUnlocked = (user, level) => level === 'beginner';
 const getNextDayNumber = (user, level) => 4;
 const canTakeTestToday = (user, level) => true;
-
-// Placeholder LevelCalendar
-const LevelCalendar = ({ level, teacherEmail, onClose }) => (
-	<div style={{ background: '#f3f3f3', padding: 20, marginTop: 20 }}>
-		<h3>Calendar for {level}</h3>
-		<button onClick={onClose}>Close</button>
-	</div>
-);
 
 const levels = [
 	{
@@ -65,7 +59,28 @@ const levels = [
 
 function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 	const [viewingCalendar, setViewingCalendar] = useState(null);
+	const [viewingDashboard, setViewingDashboard] = useState(false); // ADDED
 	const progress = getTeacherProgress(currentUser);
+
+	// ADDED
+	const handleViewDashboard = () => {
+		setViewingDashboard(true);
+	};
+
+	// ADDED
+	const handleBackToLevels = () => {
+		setViewingDashboard(false);
+	};
+
+	// ADDED
+	if (viewingDashboard) {
+		return (
+			<ProgressDashboard
+				onBackToLevels={handleBackToLevels}
+				currentUser={currentUser}
+			/>
+		);
+	}
 
 	const handleLevelClick = (level) => {
 		const unlocked = isLevelUnlocked(currentUser, level);
@@ -83,6 +98,15 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 		return levelProgress?.completedDays.length || 0;
 	};
 
+	// Prepare user progress data for calendar
+	const userProgressForCalendar = progress.levelProgress.reduce((acc, lp) => {
+		acc[lp.level] = {
+			current: getNextDayNumber(currentUser, lp.level),
+			completed: lp.completedDays
+		};
+		return acc;
+	}, {});
+
 	return (
 		<div className="min-h-screen bg-[#f7f9fb] p-8">
 			<div className="max-w-6xl mx-auto">
@@ -94,11 +118,17 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 						</p>
 					</div>
 					<div className="flex gap-3">
-						<button className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-[#e0edff] hover:text-[#2563eb] text-[1rem] font-medium transition-colors" onClick={onViewDashboard}>
+						<button
+							className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-[#e0edff] hover:text-[#2563eb] text-[1rem] font-medium transition-colors"
+							onClick={handleViewDashboard} // ONLY CHANGE
+						>
 							<FiBarChart2 className="w-5 h-5" />
 							My Progress
 						</button>
-						<button className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-[#fee2e2] hover:text-[#dc2626] text-[1rem] font-medium transition-colors" onClick={onLogout}>
+						<button
+							className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-[#fee2e2] hover:text-[#dc2626] text-[1rem] font-medium transition-colors"
+							onClick={onLogout}
+						>
 							<FiLogOut className="w-5 h-5" />
 							Logout
 						</button>
@@ -114,7 +144,6 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 						const canTakeToday = canTakeTestToday(currentUser, level.id);
 						const nextDay = getNextDayNumber(currentUser, level.id);
 
-						// Color palette for icon backgrounds
 						const iconBg = (() => {
 							if (level.id === 'beginner') return unlocked ? 'bg-[#22c55e]' : 'bg-[#22c55e]/30';
 							if (level.id === 'expert') return unlocked ? 'bg-[#3b82f6]' : 'bg-[#3b82f6]/30';
@@ -123,7 +152,6 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 							return 'bg-[#e5e7eb]';
 						})();
 
-						// Color palette for progress bar
 						const progressBar = unlocked
 							? level.id === 'beginner'
 								? 'bg-[#22c55e]'
@@ -134,7 +162,6 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 								: 'bg-[#fbbf24]'
 							: 'bg-[#e5e7eb]';
 
-						// Color palette for main button
 						const mainBtn = unlocked
 							? level.id === 'beginner'
 								? 'bg-[#22c55e] hover:bg-[#16a34a]'
@@ -145,7 +172,6 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 								: 'bg-[#fbbf24] hover:bg-[#f59e0b]'
 							: 'bg-[#f3f4f6]';
 
-						// calendar button hover tint per level
 						const calendarHover = unlocked
 							? level.id === 'beginner'
 								? 'hover:bg-[#ecfdf5]'
@@ -182,7 +208,9 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 												</span>
 											)}
 										</div>
-										<div className={`text-[#6b7280] text-[1rem] ${unlocked ? '' : 'font-medium'}`}>{level.description}</div>
+										<div className={`text-[#6b7280] text-[1rem] ${unlocked ? '' : 'font-medium'}`}>
+											{level.description}
+										</div>
 									</div>
 								</div>
 
@@ -205,14 +233,16 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 									{unlocked && (
 										<>
 											<button
-												className={`w-full ${mainBtn} text-white py-2 rounded-[0.75rem] font-semibold text-[1.08rem] shadow-sm transition-all ${canTakeToday && !isCompleted ? '' : 'opacity-70 cursor-not-allowed'}`}
+												className={`w-full ${mainBtn} text-white py-2 rounded-[0.75rem] font-semibold text-[1.08rem] shadow-sm transition-all ${
+													canTakeToday && !isCompleted ? '' : 'opacity-70 cursor-not-allowed'
+												}`}
 												disabled={!canTakeToday || isCompleted}
 												onClick={() => handleLevelClick(level.id)}
 											>
 												{isCompleted
 													? '🎉 Level Completed!'
 													: !canTakeToday
-													? '✓ Today\'s Test Done'
+													? "✓ Today's Test Done"
 													: `Start Day ${nextDay} Test`}
 											</button>
 											<button
@@ -226,7 +256,7 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 									)}
 									{!unlocked && (
 										<button
-											className={`w-full py-2 rounded-[0.75rem] font-semibold text-[1.08rem] bg-[#f3f4f6] text-[#d1d5db] border border-[#e5e7eb]`}
+											className="w-full py-2 rounded-[0.75rem] font-semibold text-[1.08rem] bg-[#f3f4f6] text-[#d1d5db] border border-[#e5e7eb]"
 											disabled
 										>
 											<FiLock className="inline w-4 h-4 mr-1 align-middle" /> Locked
@@ -242,9 +272,13 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 					<div className="mt-8 bg-gradient-to-r from-[#eef2ff] to-[#f3e8ff] border border-[#e5e7eb] rounded-[1.25rem] p-7">
 						<h2 className="font-bold mb-2 text-[1.1rem] text-[#1a1a1a]">Your Journey</h2>
 						<p className="text-[#374151] text-[1rem]">
-							Current Level: <span className="font-semibold">{progress.currentLevel.charAt(0).toUpperCase() + progress.currentLevel.slice(1)}</span>
+							Current Level:{' '}
+							<span className="font-semibold">
+								{progress.currentLevel.charAt(0).toUpperCase() + progress.currentLevel.slice(1)}
+							</span>
 							<br />
-							Total Days Completed: <span className="font-semibold">
+							Total Days Completed:{' '}
+							<span className="font-semibold">
 								{progress.levelProgress.reduce((sum, lp) => sum + lp.completedDays.length, 0)}
 							</span>
 							<br />
@@ -259,8 +293,8 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 			{viewingCalendar && (
 				<LevelCalendar
 					level={viewingCalendar}
-					teacherEmail={currentUser}
 					onClose={() => setViewingCalendar(null)}
+					userProgress={userProgressForCalendar}
 				/>
 			)}
 		</div>
