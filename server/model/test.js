@@ -4,7 +4,8 @@ const schema=new mongoose.Schema({
     questions:Array,
     date:String,
     level:String,
-    results:Array
+    results:Array,
+    taken:Array,
 })
 const model=mongoose.model("test",schema)
 module.exports=model

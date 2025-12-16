@@ -19,6 +19,10 @@ const signupSchema = new mongoose.Schema({
     level: {
         type: Number,
         default: 1
+    },
+    end_level_day:{
+        type:Number,
+        default:45
     }
 });
 
