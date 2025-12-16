@@ -2,16 +2,22 @@ import React, { useState } from 'react';
 import { FiBookOpen, FiLogOut, FiZap, FiAward, FiLock, FiBarChart2, FiCalendar } from 'react-icons/fi';
 import { FaCrown } from 'react-icons/fa';
 import LevelCalendar from './LevelCalendar';
+import { useNavigate } from "react-router-dom";
 import ProgressDashboard from './ProgressDashboard'; 
+import TestTakingPage from './testTakingPage';
 
 // Placeholder helpers (replace with your actual data logic)
 const getTeacherProgress = (user) => ({
 	currentLevel: 'beginner',
 	levelProgress: [
-		{ level: 'beginner', completedDays: [1,2,3] },
-		{ level: 'expert', completedDays: [] },
-		{ level: 'pro', completedDays: [] },
-		{ level: 'master', completedDays: [] },
+		{ level: 'beginner', completedDays: [1,2,3], tests: [
+			{ day: 1, score: 85, readingSpeed: 120, date: '2024-01-01' },
+			{ day: 2, score: 88, readingSpeed: 125, date: '2024-01-02' },
+			{ day: 3, score: 90, readingSpeed: 130, date: '2024-01-03' },
+		]},
+		{ level: 'expert', completedDays: [], tests: [] },
+		{ level: 'pro', completedDays: [], tests: [] },
+		{ level: 'master', completedDays: [], tests: [] },
 	]
 });
 const isLevelUnlocked = (user, level) => level === 'beginner';
@@ -59,25 +65,42 @@ const levels = [
 
 function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 	const [viewingCalendar, setViewingCalendar] = useState(null);
-	const [viewingDashboard, setViewingDashboard] = useState(false); // ADDED
+	const [viewingDashboard, setViewingDashboard] = useState(false);
+	const [testingLevel, setTestingLevel] = useState(null); // Add this state
 	const progress = getTeacherProgress(currentUser);
+	const navigate = useNavigate();
 
-	// ADDED
 	const handleViewDashboard = () => {
 		setViewingDashboard(true);
 	};
 
-	// ADDED
 	const handleBackToLevels = () => {
 		setViewingDashboard(false);
 	};
 
-	// ADDED
+	// If viewing dashboard, show dashboard
 	if (viewingDashboard) {
 		return (
 			<ProgressDashboard
 				onBackToLevels={handleBackToLevels}
 				currentUser={currentUser}
+			/>
+		);
+	}
+
+	// If taking test, show test page
+	if (testingLevel) {
+		return (
+			<TestTakingPage
+				level={testingLevel.level}
+				day={testingLevel.day}
+				onBack={() => setTestingLevel(null)}
+				onSubmitTest={(results) => {
+					console.log('Test results:', results);
+					// TODO: Handle test submission to backend
+					// After submission, return to levels page
+					setTestingLevel(null);
+				}}
 			/>
 		);
 	}
@@ -90,7 +113,12 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 			alert("You have already completed today's test for this level. Please come back tomorrow!");
 			return;
 		}
-		onLevelSelect(level);
+		
+		// Navigate to test page
+		setTestingLevel({
+			level: level,
+			day: getNextDayNumber(currentUser, level)
+		});
 	};
 
 	const getLevelProgress = (level) => {
@@ -98,7 +126,6 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 		return levelProgress?.completedDays.length || 0;
 	};
 
-	// Prepare user progress data for calendar
 	const userProgressForCalendar = progress.levelProgress.reduce((acc, lp) => {
 		acc[lp.level] = {
 			current: getNextDayNumber(currentUser, lp.level),
@@ -120,7 +147,7 @@ function LevelsPage({ onLevelSelect, onLogout, onViewDashboard, currentUser }) {
 					<div className="flex gap-3">
 						<button
 							className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-[#e0edff] hover:text-[#2563eb] text-[1rem] font-medium transition-colors"
-							onClick={handleViewDashboard} // ONLY CHANGE
+							onClick={handleViewDashboard}
 						>
 							<FiBarChart2 className="w-5 h-5" />
 							My Progress
