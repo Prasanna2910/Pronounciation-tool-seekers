@@ -115,6 +115,7 @@ export default function TeacherLoginPage() {
           <button
             className="mt-4 cursor-pointer w-full py-2 rounded-lg text-white font-semibold bg-[#6366f1] shadow-md"
             type="submit"
+            onClick={()=>{navigate('/levelsPage')}}
           >
             {mode === "login" ? "Login" : "Sign Up"}
           </button>

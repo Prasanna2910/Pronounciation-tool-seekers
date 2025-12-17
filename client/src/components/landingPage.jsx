@@ -54,7 +54,7 @@ const LandingPage = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/TeacherLoginPage")}
+            onClick={() => navigate("/teacherlogin")}
             className="mt-6 w-full py-2 rounded-md text-white bg-blue-700 hover:bg-blue-800 focus:outline-none cursor-pointer"
           >
             Continue as Teacher
