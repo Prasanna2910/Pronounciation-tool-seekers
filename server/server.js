@@ -33,11 +33,20 @@ import cors from "cors";
 import multer from "multer";
 import { createClient } from "@deepgram/sdk";
 import dotenv from "dotenv";
+import userRoute from "./routes/user.js";
+import testRoute from "./routes/test.js";
+import connectDB from "./config/db.js";
 
 dotenv.config();
+
+// Connect to MongoDB
+connectDB();
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/user", userRoute);
+app.use("/test", testRoute);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
