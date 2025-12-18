@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
+import axios from "axios";
 
 export default function TeacherLoginPage() {
   const [mode, setMode] = useState("login");
@@ -10,10 +11,43 @@ export default function TeacherLoginPage() {
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ mode, fullName, email, password });
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    let resp;
+
+    if (mode === "login") {
+      resp = await axios.post("http://localhost:5000/user/login", {
+        email: email,
+        password: password,
+      });
+    } else {
+      resp = await axios.post("http://localhost:5000/user/signup", {
+        name: fullName,
+        email: email,
+        password: password,
+      });
+    }
+
+    const name = resp.data.user.name;
+    const level = resp.data.user.level;
+    const token = resp.data.token;
+
+    const userObj = {
+      name: name,
+      level: level,
+    };
+
+    localStorage.setItem("user", JSON.stringify(userObj));
+    localStorage.setItem("token", token);
+
+    navigate("/levelsPage");
+
+  } catch (err) {
+    console.error(`${mode} error:`, err);
+  }
+};
 
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gray-50 font-sans">
@@ -115,7 +149,6 @@ export default function TeacherLoginPage() {
           <button
             className="mt-4 cursor-pointer w-full py-2 rounded-lg text-white font-semibold bg-[#6366f1] shadow-md"
             type="submit"
-            onClick={()=>{navigate('/levelsPage')}}
           >
             {mode === "login" ? "Login" : "Sign Up"}
           </button>

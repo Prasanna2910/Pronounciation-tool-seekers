@@ -5,4 +5,5 @@ function user_test_day(user){
     const level_tests_day=level_tests.length
     return level_tests_day
 }
-exports.user_test_day=user_test_day
+
+export default { user_test_day };

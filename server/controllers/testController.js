@@ -1,9 +1,10 @@
-const Test = require("../model/test");
-const User = require("../model/user");
-const user_test_day = require("../utils/user");
+import Test from "../model/test.js";
+import User from "../model/user.js";
+import user_test_day from "../utils/user.js";
 
 const AGREGATE_SCORE=2
-exports.createTest = async (req, res) => {
+
+const createTest = async (req, res) => {
     const { para, questions, level, date } = req.body;
     try {
         const check = await Test.findOne({ date, level });
@@ -18,7 +19,7 @@ exports.createTest = async (req, res) => {
     }
 };
 
-exports.getAllTests = async (req, res) => {
+const getAllTests = async (req, res) => {
     try {
         const tests = await Test.find({});
         res.json(tests);
@@ -27,7 +28,7 @@ exports.getAllTests = async (req, res) => {
     }
 };
 
-exports.getTestById = async (req, res) => {
+const getTestById = async (req, res) => {
     const { id, level,user_id } = req.params;
     try {
         const test = await Test.findOne({ date: id, level: level });
@@ -44,7 +45,7 @@ exports.getTestById = async (req, res) => {
     }
 };
 
-exports.submitResult = async (req, res) => {
+const submitResult = async (req, res) => {
     const { id } = req.params;
     const { result, user_id } = req.body;
     const user_data=await User.findById(user_id)
@@ -71,7 +72,7 @@ exports.submitResult = async (req, res) => {
     }
 };
 
-exports.updateTest = async (req, res) => {
+const updateTest = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
@@ -85,7 +86,7 @@ exports.updateTest = async (req, res) => {
     }
 };
 
-exports.deleteTest = async (req, res) => {
+const deleteTest = async (req, res) => {
     try {
         const { id } = req.params;
         const deleted = await Test.findByIdAndDelete(id);
@@ -97,3 +98,4 @@ exports.deleteTest = async (req, res) => {
         res.status(500).json({ message: 'Error deleting test', error: err.message });
     }
 };
+export default { createTest, getAllTests, getTestById, submitResult, updateTest, deleteTest };

@@ -1,7 +1,9 @@
-const User = require("../model/user");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-require("dotenv").config();
+import User from "../model/user.js";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const generateToken = (user) => {
     return jwt.sign(
@@ -11,7 +13,7 @@ const generateToken = (user) => {
     );
 };
 
-exports.signup = async (req, res) => {
+const signup = async (req, res) => {
     const { name, email, password } = req.body;
 
     try {
@@ -23,7 +25,8 @@ exports.signup = async (req, res) => {
 
         res.status(201).json({
             message: "User signed up successfully",
-            token: token
+            token: token,
+            user: savedUser
         });
     } catch (err) {
         res.status(400).json({
@@ -33,7 +36,7 @@ exports.signup = async (req, res) => {
     }
 };
 
-exports.login = async (req, res) => {
+const login = async (req, res) => {
     const { email, password } = req.body;
 
     try {
@@ -62,7 +65,7 @@ exports.login = async (req, res) => {
     }
 };
 
-exports.checkUser = async (req, res) => {
+const checkUser = async (req, res) => {
     const { email } = req.body;
     try {
         const check = await User.findOne({ email });
@@ -76,7 +79,7 @@ exports.checkUser = async (req, res) => {
     }
 };
 
-exports.googleAuth = async (req, res) => {
+const googleAuth = async (req, res) => {
     const { email, name } = req.body;
     try {
         let user = await User.findOne({ email });
@@ -101,7 +104,7 @@ exports.googleAuth = async (req, res) => {
     }
 };
 
-exports.getProfile = async (req, res) => {
+const getProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select("-password");
         if (!user) {
@@ -112,3 +115,5 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ message: "Error fetching profile", error: err.message });
     }
 };
+
+export default { signup, login, checkUser, googleAuth, getProfile };

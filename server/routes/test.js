@@ -1,7 +1,8 @@
-const express = require("express");
+import express from "express";
+import testController from "../controllers/testController.js";
+import authMiddleware from "../middleware/authMiddleware.js";
+
 const route = express.Router();
-const testController = require("../controllers/testController");
-const authMiddleware = require("../middleware/authMiddleware");
 
 // Public routes (if any, but getTestById seems to be used by logged in users too based on frontend logic)
 // The frontend sends user_id, but we should verify the token matches the user if possible, or just require a valid token.
@@ -15,4 +16,4 @@ route.post("/submit/:id", authMiddleware, testController.submitResult);
 route.put("/test/:id", authMiddleware, testController.updateTest);
 route.delete("/test/:id", authMiddleware, testController.deleteTest);
 
-module.exports = route;
+export default route;
