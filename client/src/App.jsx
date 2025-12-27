@@ -7,11 +7,13 @@ import AdminDashboard from "./components/AdminDashboard.jsx";
 import LevelsPage from "./components/levelsPage.jsx";
 import TestTakingPage from "./components/testTakingPage.jsx";
 import ResultPage from "./components/ResultPage.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   return (
-    <Router>
-      <Routes>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <Router>
+        <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/teacherlogin" element={<TeacherLoginPage />} />
         <Route path="/adminlogin" element={<AdminLoginPage />} />
@@ -21,6 +23,7 @@ function App() {
         <Route path="/result" element={<ResultPage />} />
       </Routes>
     </Router>
+    </GoogleOAuthProvider>
   );
 }
 

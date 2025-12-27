@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import axios from "axios";
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 
 export default function TeacherLoginPage() {
   const [mode, setMode] = useState("login");
@@ -11,97 +13,100 @@ export default function TeacherLoginPage() {
 
   const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  try {
-    let resp;
+    try {
+      let resp;
 
-    if (mode === "login") {
-      resp = await axios.post("http://localhost:5000/user/login", {
-        email: email,
-        password: password,
-      });
-    } else {
-      resp = await axios.post("http://localhost:5000/user/signup", {
-        name: fullName,
-        email: email,
-        password: password,
-      });
+      if (mode === "login") {
+        resp = await axios.post("http://localhost:5000/user/login", {
+          email,
+          password,
+        });
+      } else {
+        resp = await axios.post("http://localhost:5000/user/signup", {
+          name: fullName,
+          email,
+          password,
+        });
+      }
+
+      const { user, token } = resp.data;
+
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ name: user.name, level: user.level })
+      );
+      localStorage.setItem("token", token);
+
+      navigate("/levelsPage");
+    } catch (err) {
+      console.error(`${mode} error:`, err);
+      alert("Authentication failed");
     }
+  };
 
-    const name = resp.data.user.name;
-    const level = resp.data.user.level;
-    const token = resp.data.token;
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const decoded = jwtDecode(credentialResponse.credential);
 
-    const userObj = {
-      name: name,
-      level: level,
-    };
+      const resp = await axios.post("http://localhost:5000/user/google", {
+        email: decoded.email,
+        name: decoded.name,
+      });
 
-    localStorage.setItem("user", JSON.stringify(userObj));
-    localStorage.setItem("token", token);
+      const { user, token } = resp.data;
 
-    navigate("/levelsPage");
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ name: user.name, level: user.level })
+      );
+      localStorage.setItem("token", token);
 
-  } catch (err) {
-    console.error(`${mode} error:`, err);
-  }
-};
+      navigate("/levelsPage");
+    } catch (err) {
+      console.error("Google auth error:", err);
+      alert("Google login failed");
+    }
+  };
 
   return (
     <div className="min-h-screen relative flex items-center justify-center bg-gray-50 font-sans">
-      {/* Back button (top-left) */}
+      {/* Back button */}
       <button
         type="button"
         onClick={() => navigate(-1)}
-        aria-label="Go back"
-        className="absolute top-4 left-4 p-2 rounded-full bg-white shadow-sm hover:bg-gray-100 focus:outline-none cursor-pointer"
+        className="absolute top-4 left-4 p-2 rounded-full bg-white shadow-sm hover:bg-gray-100"
       >
         <IoArrowBack className="text-xl text-gray-700" />
       </button>
 
-      <div
-        className="w-[450px] max-w-full bg-white rounded-xl shadow-md p-10 text-center"
-        role="main"
-        aria-labelledby="tlp-title"
-      >
-        <h2
-          id="tlp-title"
-          className="text-gray-900 font-rubik font-semibold text-2xl mb-1"
-        >
-          Login
+      <div className="w-[450px] max-w-full bg-white rounded-xl shadow-md p-10 text-center">
+        <h2 className="text-gray-900 font-semibold text-2xl mb-1">
+          {mode === "login" ? "Login" : "Sign Up"}
         </h2>
         <p className="text-gray-500 text-lg mb-4">
           Improve your reading skills with timed comprehension tests
         </p>
-
-        <div
-          className="flex bg-gray-100 p-1 rounded-full w-full my-2 gap-2"
-          role="tablist"
-          aria-label="auth mode"
-        >
+        <div className="flex bg-gray-100 p-1 rounded-full w-full my-2 gap-2">
           <button
-            type="button"
-            className={`flex-1 cursor-pointer py-2 rounded-full text-sm font-semibold transition ${
+            className={`flex-1 py-2 rounded-full text-sm font-semibold ${
               mode === "login"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600"
             }`}
             onClick={() => setMode("login")}
-            aria-selected={mode === "login"}
           >
             Login
           </button>
           <button
-            type="button"
-            className={`flex-1 py-2 cursor-pointer rounded-full text-sm font-semibold transition ${
+            className={`flex-1 py-2 rounded-full text-sm font-semibold ${
               mode === "signup"
                 ? "bg-white text-gray-900 shadow-sm"
                 : "text-gray-600"
             }`}
             onClick={() => setMode("signup")}
-            aria-selected={mode === "signup"}
           >
             Sign Up
           </button>
@@ -111,24 +116,22 @@ const handleSubmit = async (e) => {
           {mode === "signup" && (
             <>
               <label className="block text-sm text-gray-600 mt-3 mb-1">
-                Full name
+                Full Name
               </label>
               <input
-                className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                className="w-full px-3 py-2 rounded-md border border-gray-200"
                 type="text"
-                placeholder="Your full name"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                required={mode === "signup"}
+                required
               />
             </>
           )}
 
           <label className="block text-sm text-gray-600 mt-3 mb-1">Email</label>
           <input
-            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full px-3 py-2 rounded-md border border-gray-200"
             type="email"
-            placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
@@ -138,21 +141,28 @@ const handleSubmit = async (e) => {
             Password
           </label>
           <input
-            className="w-full px-3 py-2 rounded-md border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full px-3 py-2 rounded-md border border-gray-200"
             type="password"
-            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
           />
 
           <button
-            className="mt-4 cursor-pointer w-full py-2 rounded-lg text-white font-semibold bg-[#6366f1] shadow-md"
             type="submit"
+            className="mt-4 w-full py-2 rounded-lg text-white font-semibold bg-indigo-500"
           >
             {mode === "login" ? "Login" : "Sign Up"}
           </button>
         </form>
+
+        <div className="my-4 text-gray-400 text-sm">OR</div>
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => alert("Google Login Failed")}
+          />
+        </div>
       </div>
     </div>
   );
