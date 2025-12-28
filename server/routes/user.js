@@ -6,8 +6,9 @@ const route = express.Router();
 
 route.post("/signup", userController.signup);
 route.post("/login", userController.login);
-route.post("/checkuser", userController.checkUser);
+
 route.post("/google", userController.googleAuth);
 route.get("/profile", authMiddleware, userController.getProfile);
+route.get("/all", authMiddleware, userController.getAllUsers);
 
 export default route;

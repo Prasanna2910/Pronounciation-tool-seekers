@@ -5,7 +5,7 @@ import axios from "axios";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-export default function TeacherLoginPage() {
+export default function LoginPage() {
   const [mode, setMode] = useState("login");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,13 +34,15 @@ export default function TeacherLoginPage() {
 
       const { user, token } = resp.data;
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ name: user.name, level: user.level })
-      );
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role || "user");
 
-      navigate("/levelsPage");
+      if (user.role === "admin") {
+        window.location.href = "/admindashboard";
+      } else {
+        window.location.href = "/levelsPage";
+      }
     } catch (err) {
       console.error(`${mode} error:`, err);
       alert("Authentication failed");
@@ -58,13 +60,15 @@ export default function TeacherLoginPage() {
 
       const { user, token } = resp.data;
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify({ name: user.name, level: user.level })
-      );
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", user.role || "Admin");
       localStorage.setItem("token", token);
 
-      navigate("/levelsPage");
+      if (user.role === "admin") {
+        window.location.href = "/admindashboard";
+      } else {
+        window.location.href = "/levelsPage";
+      }
     } catch (err) {
       console.error("Google auth error:", err);
       alert("Google login failed");
@@ -91,21 +95,19 @@ export default function TeacherLoginPage() {
         </p>
         <div className="flex bg-gray-100 p-1 rounded-full w-full my-2 gap-2">
           <button
-            className={`flex-1 py-2 rounded-full text-sm font-semibold ${
-              mode === "login"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600"
-            }`}
+            className={`flex-1 py-2 rounded-full text-sm font-semibold ${mode === "login"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600"
+              }`}
             onClick={() => setMode("login")}
           >
             Login
           </button>
           <button
-            className={`flex-1 py-2 rounded-full text-sm font-semibold ${
-              mode === "signup"
-                ? "bg-white text-gray-900 shadow-sm"
-                : "text-gray-600"
-            }`}
+            className={`flex-1 py-2 rounded-full text-sm font-semibold ${mode === "signup"
+              ? "bg-white text-gray-900 shadow-sm"
+              : "text-gray-600"
+              }`}
             onClick={() => setMode("signup")}
           >
             Sign Up

@@ -2,26 +2,23 @@ import React from 'react';
 
 // Level Calendar Modal Component
 const LevelCalendar = ({ level, onClose, userProgress }) => {
-	// Get progress data from props or use mock data
-	const levelProgress = userProgress || {
-		beginner: { current: 4, completed: [1, 2, 3] },
-		expert: { current: 1, completed: [] },
-		pro: { current: 1, completed: [] },
-		master: { current: 1, completed: [] }
-	};
+	// Get progress data from props
+	// userProgress is expected to be: { completedDays: [...], tests: [...] }
+	const currentLevelData = userProgress || { completedDays: [], tests: [] };
+	const completedDays = currentLevelData.completedDays || [];
+
+	// Calculate current day based on completed days
+	const currentDay = completedDays.length + 1;
 
 	const levels = [
-		{ id: 'beginner', name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
-		{ id: 'expert', name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
-		{ id: 'pro', name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
-		{ id: 'master', name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
+		{ id: 1, name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
+		{ id: 2, name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
+		{ id: 3, name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
+		{ id: 4, name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
 	];
 
 	const totalDays = 30;
-	const currentLevelData = levelProgress[level] || { current: 1, completed: [] };
-	const completedDays = currentLevelData.completed || [];
-	const currentDay = currentLevelData.current || 1;
-	
+
 	const currentLevelInfo = levels.find(l => l.id === level) || levels[0];
 
 	const handleDayClick = (day) => {
@@ -75,7 +72,9 @@ const LevelCalendar = ({ level, onClose, userProgress }) => {
 						<div className="grid grid-cols-5 sm:grid-cols-10 gap-3 mb-8">
 							{Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
 								const status = getDayStatus(day);
-								
+								const testForDay = currentLevelData.tests?.find(t => t.day === day);
+								const testDate = testForDay ? new Date(testForDay.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : null;
+
 								return (
 									<button
 										key={day}
@@ -84,33 +83,36 @@ const LevelCalendar = ({ level, onClose, userProgress }) => {
 										className={`
 											relative aspect-square rounded-2xl flex flex-col items-center justify-center
 											transition-all duration-200 border-2
-											${status === 'completed' 
-												? `bg-white ${currentLevelInfo.borderColor} ${currentLevelInfo.textColor} cursor-pointer hover:bg-green-50` 
+											${status === 'completed'
+												? `bg-white ${currentLevelInfo.borderColor} ${currentLevelInfo.textColor} cursor-pointer hover:bg-green-50`
 												: status === 'current'
-												? `bg-white ${currentLevelInfo.borderColor} ${currentLevelInfo.textColor} shadow-md`
-												: 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
+													? `bg-white ${currentLevelInfo.borderColor} ${currentLevelInfo.textColor} shadow-md`
+													: 'bg-white border-gray-200 text-gray-400 cursor-not-allowed'
 											}
 										`}
 									>
 										<span className="text-xs text-gray-400 font-medium mb-0.5">Day</span>
-										<span className="text-xl font-bold mb-2">{day}</span>
-										
+										<span className="text-xl font-bold mb-1">{day}</span>
+										{status === 'completed' && testDate && (
+											<span className="text-[0.65rem] font-medium opacity-80">{testDate}</span>
+										)}
+
 										{status === 'completed' && (
-											<div className="absolute bottom-2">
-												<div className={`w-5 h-5 ${currentLevelInfo.color} rounded-full flex items-center justify-center`}>
-													<svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+											<div className="absolute bottom-1 right-1">
+												<div className={`w-4 h-4 ${currentLevelInfo.color} rounded-full flex items-center justify-center`}>
+													<svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
 													</svg>
 												</div>
 											</div>
 										)}
-										
+
 										{status === 'current' && (
 											<div className="absolute bottom-2">
 												<div className={`w-5 h-5 border-3 ${currentLevelInfo.borderColor} rounded-full bg-white`} />
 											</div>
 										)}
-										
+
 										{status === 'locked' && (
 											<div className="absolute bottom-2">
 												<LockIcon size={16} className="text-gray-300" />

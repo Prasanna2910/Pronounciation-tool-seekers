@@ -2,7 +2,7 @@ import React from "react";
 import { LuShield } from "react-icons/lu";
 import { FaUsers } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import TeacherLoginPage from "./TeacherLoginPage";
+
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -33,7 +33,7 @@ const LandingPage = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/adminlogin")}
+            onClick={() => navigate("/login")}
             className="mt-6 w-full py-2 rounded-md text-white bg-purple-600 hover:bg-purple-800 focus:outline-none cursor-pointer"
           >
             Continue as Admin
@@ -54,7 +54,7 @@ const LandingPage = () => {
 
           <button
             type="button"
-            onClick={() => navigate("/teacherlogin")}
+            onClick={() => navigate("/login")}
             className="mt-6 w-full py-2 rounded-md text-white bg-blue-700 hover:bg-blue-800 focus:outline-none cursor-pointer"
           >
             Continue as Teacher

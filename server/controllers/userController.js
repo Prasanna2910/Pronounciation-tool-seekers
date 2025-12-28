@@ -19,6 +19,12 @@ const signup = async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({ name, email, password: hashedPassword });
+        if(email=="mohanavamsi14@gmail.com"){
+            newUser.role="admin"
+        }
+        else{
+            newUser.role="user"
+        }
 
         const savedUser = await newUser.save();
         const token = generateToken(savedUser);
@@ -116,4 +122,13 @@ const getProfile = async (req, res) => {
     }
 };
 
-export default { signup, login, checkUser, googleAuth, getProfile };
+const getAllUsers = async (req, res) => {
+    try {
+        const users = await User.find({ role: { $ne: "admin" } }).select("-password");
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching users", error: err.message });
+    }
+};
+
+export default { signup, login, checkUser, googleAuth, getProfile, getAllUsers };

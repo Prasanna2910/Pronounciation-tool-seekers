@@ -17,7 +17,7 @@ app.use("/user", userRoute);
 app.use("/test", testRoute);
 
 const upload = multer({ storage: multer.memoryStorage() });
-app.post("/upload",upload.single("file"),async(req,res)=>{
+app.post("/get_result",upload.single("file"),async(req,res)=>{
     if(!req.file){
         return res.status(400).send("No file uploaded.")
     }
@@ -37,6 +37,7 @@ app.post("/upload",upload.single("file"),async(req,res)=>{
         });
 
         const data = await response.json();
+
         res.json(data);
 
     } catch (error) {
