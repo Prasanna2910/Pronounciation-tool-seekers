@@ -153,6 +153,17 @@ function TestTakingPage() {
 				}
 			});
 
+			let pronunciation_score = 0;
+
+			// New JSON response handling
+			if (analysisRes.data.data && analysisRes.data.data.pronunciation_score !== undefined) {
+				pronunciation_score = analysisRes.data.data.pronunciation_score;
+			}
+			// Fallback (if any old response format persists)
+			else if (analysisRes.data.pronunciation_score) {
+				pronunciation_score = analysisRes.data.pronunciation_score;
+			}
+
 			let correctCount = 0;
 			testData.questions.forEach((q, idx) => {
 				if (selectedAnswers[idx] === q.correctAnswer) {
@@ -161,11 +172,21 @@ function TestTakingPage() {
 			});
 			const quizScore = Math.round((correctCount / testData.questions.length) * 100);
 
+			// Use score from JSON data
+			// If analysisRes.data.data exists, merge it into results
+			const serverData = analysisRes.data.data || analysisRes.data;
+
 			const results = {
-				...analysisRes.data,
+				...serverData,
 				quizScore: quizScore,
-				score: Math.round(((analysisRes.data.pronunciation_score || 0) + quizScore) / 2),
+				score: Math.round((pronunciation_score + quizScore) / 2),
 				correctAnswers: correctCount,
+				wpm: serverData.wpm || 0,
+				proficiency_score: serverData.proficiency_score || 0,
+				fluency_score: serverData.fluency_score || 0,
+				integrity_score: serverData.integrity_score || 0,
+				standard_score: serverData.standard_score || 0,
+				phone_score: serverData.phone_score || 0,
 				totalQuestions: testData.questions.length,
 				level: level,
 				day: day,
