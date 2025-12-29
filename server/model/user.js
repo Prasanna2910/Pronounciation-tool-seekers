@@ -1,4 +1,5 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+
 const signupSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -26,4 +27,4 @@ const signupSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("user", signupSchema);
+export default mongoose.model("user", signupSchema);
