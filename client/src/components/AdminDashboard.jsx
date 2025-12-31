@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import axios from "axios";
 
-export default function AdminDashboard() {
+export default function AdminDashboard({ onLogout }) {
   const [teachers, setTeachers] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -112,7 +112,18 @@ export default function AdminDashboard() {
             >
               <FiBookOpen /> Manage Tests
             </button>
-            <button className="px-5 py-2.5 glass hover:bg-red-50 text-gray-700 hover:text-red-500 rounded-xl transition-all flex items-center gap-2 font-medium">
+            <button
+              onClick={() => {
+                if (onLogout) onLogout();
+                else {
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("role");
+                  localStorage.removeItem("user");
+                  window.location.href = "/login";
+                }
+              }}
+              className="px-5 py-2.5 glass hover:bg-red-50 text-gray-700 hover:text-red-500 rounded-xl transition-all flex items-center gap-2 font-medium"
+            >
               <FiLogOut /> Logout
             </button>
           </div>
