@@ -14,6 +14,15 @@ function App() {
   const [auth, setAuth] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    setAuth(false);
+    setIsAdmin(false);
+    <Navigate to="/login" />;
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
@@ -49,17 +58,17 @@ function App() {
 
           <Route
             path="/admindashboard"
-            element={auth && isAdmin ? <AdminDashboard /> : <Navigate to="/" />}
+            element={auth && isAdmin ? <AdminDashboard onLogout={handleLogout} /> : <Navigate to="/" />}
           />
 
           <Route
             path="/admin/tests"
-            element={auth && isAdmin ? <AdminTestManagement /> : <Navigate to="/" />}
+            element={auth && isAdmin ? <AdminTestManagement onLogout={handleLogout} /> : <Navigate to="/" />}
           />
 
           <Route
             path="/levelsPage"
-            element={auth ? <LevelsPage /> : <Navigate to="/" />}
+            element={auth ? <LevelsPage onLogout={handleLogout} /> : <Navigate to="/" />}
           />
 
           <Route
