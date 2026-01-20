@@ -35,7 +35,7 @@ function TestTakingPage() {
 			const token = localStorage.getItem('token');
 			const userStr = localStorage.getItem('user');
 			const user = JSON.parse(userStr);
-			const res = await axios.get(`http://localhost:5000/test/random/${level}/${user._id}`, {
+			const res = await axios.get(`https://pronounciation-tool-seekers.onrender.com/test/random/${level}/${user._id}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			setTestData(res.data.test);
@@ -146,7 +146,7 @@ function TestTakingPage() {
 			formData.append("file", audioBlob, "recording.webm");
 			formData.append("expected_text", testData.para);
 
-			const analysisRes = await axios.post("http://localhost:5000/get_result", formData, {
+			const analysisRes = await axios.post("https://pronounciation-tool-seekers.onrender.com/get_result", formData, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 					"Content-Type": "multipart/form-data"
@@ -193,7 +193,7 @@ function TestTakingPage() {
 				user_id: user._id
 			};
 
-			await axios.post(`http://localhost:5000/test/submit/${testId}`, {
+			await axios.post(`https://pronounciation-tool-seekers.onrender.com/test/submit/${testId}`, {
 				result: {
 					...results,
 					marks: results.score,
