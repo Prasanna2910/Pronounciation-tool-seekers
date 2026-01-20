@@ -21,7 +21,7 @@ function LevelsPage({ onLogout }) {
 	const fetchUserProfile = async () => {
 		try {
 			const token = localStorage.getItem('token');
-			const { data } = await axios.get('http://localhost:5000/user/profile', {
+			const { data } = await axios.get('https://pronounciation-tool-seekers.onrender.com/user/profile', {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			setCurrentUser(data);
