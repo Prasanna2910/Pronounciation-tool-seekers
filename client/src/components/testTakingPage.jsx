@@ -130,88 +130,198 @@ function TestTakingPage() {
 	);
 
 	const handleSubmit = async () => {
-		if (!allQuestionsAnswered || !audioBlob) {
-			alert("Please answer all questions and record audio.");
-			return;
-		}
 
-		setSubmitting(true);
+    if (!allQuestionsAnswered || !audioBlob) {
+        alert("Please answer all questions and record audio.");
+        return;
+    }
 
-		try {
-			const token = localStorage.getItem('token');
-			const userStr = localStorage.getItem('user');
-			const user = JSON.parse(userStr);
+    setSubmitting(true);
 
-			const formData = new FormData();
-			formData.append("file", audioBlob, "recording.webm");
-			formData.append("expected_text", testData.para);
+    try {
 
-			const analysisRes = await axios.post("https://pronounciation-tool-seekers.onrender.com/get_result", formData, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-					"Content-Type": "multipart/form-data"
-				}
-			});
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user"));
 
-			let pronunciation_score = 0;
+        // Prepare audio upload
+        const formData = new FormData();
 
-			// New JSON response handling
-			if (analysisRes.data.data && analysisRes.data.data.pronunciation_score !== undefined) {
-				pronunciation_score = analysisRes.data.data.pronunciation_score;
-			}
-			// Fallback (if any old response format persists)
-			else if (analysisRes.data.pronunciation_score) {
-				pronunciation_score = analysisRes.data.pronunciation_score;
-			}
+        formData.append("file", audioBlob, "recording.webm");
+        formData.append("expected_text", testData.para);
 
-			let correctCount = 0;
-			testData.questions.forEach((q, idx) => {
-				if (selectedAnswers[idx] === q.correctAnswer) {
-					correctCount++;
-				}
-			});
-			const quizScore = Math.round((correctCount / testData.questions.length) * 100);
 
-			// Use score from JSON data
-			// If analysisRes.data.data exists, merge it into results
-			const serverData = analysisRes.data.data || analysisRes.data;
+        // Send to pronunciation API
+        const analysisRes = await axios.post(
+            "https://pronounciation-tool-seekers.onrender.com/get_result",
+            formData,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data"
+                }
+            }
+        );
 
-			const results = {
-				...serverData,
-				quizScore: quizScore,
-				score: Math.round((pronunciation_score + quizScore) / 2),
-				correctAnswers: correctCount,
-				wpm: serverData.wpm || 0,
-				proficiency_score: serverData.proficiency_score || 0,
-				fluency_score: serverData.fluency_score || 0,
-				integrity_score: serverData.integrity_score || 0,
-				standard_score: serverData.standard_score || 0,
-				phone_score: serverData.phone_score || 0,
-				totalQuestions: testData.questions.length,
-				level: level,
-				day: day,
-				user_id: user._id
-			};
+        const data = analysisRes.data;
 
-			await axios.post(`https://pronounciation-tool-seekers.onrender.com/test/submit/${testId}`, {
-				result: {
-					...results,
-					marks: results.score,
-					date: new Date()
-				},
-				user_id: user._id
-			}, {
-				headers: { Authorization: `Bearer ${token}` }
-			});
 
-			navigate('/result', { state: results });
+        // ========================
+        // EXTRACT SCORES SAFELY
+        // ========================
 
-		} catch (err) {
-			console.error("Error submitting test:", err);
-			alert("Error submitting test. Please try again.");
-			setSubmitting(false);
-		}
-	};
+        const pronunciation_score =
+            Math.round(data.pronunciation?.overall_score || 0);
+
+        const fluency_score =
+            Math.round(data.fluency?.overall_score || 0);
+
+        const proficiency_score =
+            Math.round(data.overall?.overall_score || 0);
+
+
+        const reading = data.reading || {};
+
+
+        // FIXED WPM
+        const wpm =
+            Math.round(
+                reading.speed_wpm_correct ??
+                reading.speed_wpm ??
+                0
+            );
+
+
+        // FIXED ACCURACY (convert decimal → %)
+        const accuracy =
+            reading.accuracy
+                ? Math.round(reading.accuracy * 100)
+                : 0;
+
+
+        const completion =
+            reading.completion || 0;
+
+        const total_time =
+            reading.total_time || 0;
+
+        const correct_words =
+            reading.correct_words_read || 0;
+
+        const words_read =
+            reading.words_read || 0;
+
+
+        // ========================
+        // QUIZ SCORE
+        // ========================
+
+        let correctCount = 0;
+
+        testData.questions.forEach((q, idx) => {
+
+            if (selectedAnswers[idx] === q.correctAnswer) {
+                correctCount++;
+            }
+
+        });
+
+        const quizScore = Math.round(
+            (correctCount / testData.questions.length) * 100
+        );
+
+
+        // ========================
+        // FINAL SCORE CALCULATION (FIXED)
+        // ========================
+
+        const finalScore = Math.round(
+
+            pronunciation_score * 0.4 +
+            fluency_score * 0.2 +
+            quizScore * 0.3 +
+            accuracy * 0.1
+
+        );
+
+
+        // ========================
+        // FINAL RESULT OBJECT
+        // ========================
+
+        const results = {
+
+            // Final Score
+            score: finalScore,
+            totalScore: finalScore,
+
+            // Speaking Scores
+            pronunciation_score,
+            fluency_score,
+            proficiency_score,
+
+            // Quiz
+            quizScore,
+            correctAnswers: correctCount,
+            totalQuestions: testData.questions.length,
+
+            // Reading Metrics
+            wpm,
+            accuracy,
+            completion,
+            total_time,
+            correct_words,
+            words_read,
+
+            // Meta
+            level,
+            day,
+            user_id: user._id,
+            date: new Date()
+
+        };
+
+
+        // ========================
+        // SAVE RESULT
+        // ========================
+
+        await axios.post(
+            `https://pronounciation-tool-seekers.onrender.com/test/submit/${testId}`,
+            {
+                result: results,
+                user_id: user._id
+            },
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+
+
+        // ========================
+        // NAVIGATE TO RESULT PAGE
+        // ========================
+
+        navigate("/result", {
+            state: results
+        });
+
+
+    }
+    catch (err) {
+
+        console.error("Error submitting test:", err);
+
+        alert("Error submitting test. Please try again.");
+
+        setSubmitting(false);
+
+    }
+
+};
+
+
 
 	return (
 		<div className="min-h-screen bg-[#f8fafc] p-6 pb-20 font-sans relative">
