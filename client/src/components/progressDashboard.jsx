@@ -5,34 +5,71 @@ import { FiArrowLeft, FiCheckCircle, FiAward, FiTrendingUp, FiZap } from 'react-
 function ProgressDashboard({ onBackToLevels, currentUser }) {
 	const [selectedLevel, setSelectedLevel] = useState(null);
 
-	// Mock data - replace with actual data from your backend
-	const progressData = {
-		daysCompleted: 3,
-		levelsCompleted: 0,
-		averageScore: 0,
-		averageReadingSpeed: 0,
-		levelProgress: [
-			{ level: 'beginner', completedDays: [1, 2, 3], tests: [
-				{ day: 1, score: 85, readingSpeed: 120, date: '2024-01-01' },
-				{ day: 2, score: 88, readingSpeed: 125, date: '2024-01-02' },
-				{ day: 3, score: 90, readingSpeed: 130, date: '2024-01-03' },
-			]},
-			{ level: 'expert', completedDays: [], tests: [] },
-			{ level: 'pro', completedDays: [], tests: [] },
-			{ level: 'master', completedDays: [], tests: [] },
-		]
+	// Calculate actual progress data from currentUser tests
+	const getLevelTests = (levelId) => {
+		return currentUser?.tests?.filter(t => t.level === levelId) || [];
 	};
 
-	const levels = [
-		{ id: 'beginner', name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
-		{ id: 'expert', name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
-		{ id: 'pro', name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
-		{ id: 'master', name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
-	];
+	const calculateAverageScore = (tests) => {
+		if (!tests || tests.length === 0) return 0;
+		const sum = tests.reduce((acc, test) => acc + (test.score || 0), 0);
+		return Math.round(sum / tests.length);
+	};
+
+	const calculateAverageSpeed = (tests) => {
+		if (!tests || tests.length === 0) return 0;
+		const sum = tests.reduce((acc, test) => acc + (test.readingSpeed || 0), 0);
+		return Math.round(sum / tests.length);
+	};
+
+	const allTests = currentUser?.tests || [];
+	const totalDaysCompleted = allTests.length;
+	const totalAverageScore = calculateAverageScore(allTests);
+	const totalAverageSpeed = calculateAverageSpeed(allTests);
+
+	const progressData = {
+		daysCompleted: totalDaysCompleted,
+		levelsCompleted: 0,
+		averageScore: totalAverageScore,
+		averageReadingSpeed: totalAverageSpeed,
+		levelProgress: [
+			{ 
+				level: 1, 
+				name: 'beginner',
+				completedDays: getLevelTests(1).map(t => t.day) || [], 
+				tests: getLevelTests(1)
+			},
+			{ 
+				level: 2, 
+				name: 'expert',
+				completedDays: getLevelTests(2).map(t => t.day) || [], 
+				tests: getLevelTests(2)
+			},
+			{ 
+				level: 3, 
+				name: 'pro',
+				completedDays: getLevelTests(3).map(t => t.day) || [], 
+				tests: getLevelTests(3)
+			},
+			{ 
+				level: 4, 
+				name: 'master',
+				completedDays: getLevelTests(4).map(t => t.day) || [], 
+				tests: getLevelTests(4)
+			},
+		]
+	};
 
 	const getLevelData = (levelId) => {
 		return progressData.levelProgress.find(lp => lp.level === levelId);
 	};
+
+	const levels = [
+		{ id: 1, name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
+		{ id: 2, name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
+		{ id: 3, name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
+		{ id: 4, name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
+	];
 
 	const selectedLevelData = selectedLevel ? getLevelData(selectedLevel) : null;
 
