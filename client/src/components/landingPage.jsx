@@ -47,7 +47,7 @@ const LandingPage = () => {
             </div>
           </div>
 
-          <div className="text-lg font-semibold">Teacher</div>
+          <div className="text-lg font-semibold">Learner</div>
           <div className="text-base text-gray-600 text-center">
             Take Comprehension tests and track your progress
           </div>
@@ -57,7 +57,7 @@ const LandingPage = () => {
             onClick={() => navigate("/login")}
             className="mt-6 w-full py-2 rounded-md text-white bg-blue-700 hover:bg-blue-800 focus:outline-none cursor-pointer"
           >
-            Continue as Teacher
+            Continue as Learner
           </button>
         </div>
       </div>
