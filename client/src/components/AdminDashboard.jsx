@@ -102,7 +102,7 @@ export default function AdminDashboard({ onLogout }) {
               </h1>
             </div>
             <p className="text-gray-500 text-lg">
-              Monitor teacher progress and performance metrics
+              Monitor Learners progress and performance metrics
             </p>
           </div>
           <div className="flex gap-3">
@@ -137,7 +137,7 @@ export default function AdminDashboard({ onLogout }) {
                 <FiUser className="text-2xl" />
               </div>
               <div>
-                <div className="text-sm text-gray-500 font-medium">Total Teachers</div>
+                <div className="text-sm text-gray-500 font-medium">Total Learners</div>
                 <div className="text-3xl font-bold text-gray-800 font-heading">{totalTeachers}</div>
               </div>
             </div>
@@ -172,10 +172,10 @@ export default function AdminDashboard({ onLogout }) {
           {/* Teachers List */}
           <div className="glass bg-white/80 rounded-2xl p-6 shadow-sm border border-white/60 animate-slide-up" style={{ animationDelay: '100ms' }}>
             <h3 className="text-xl font-bold text-gray-800 mb-1 font-heading">
-              Teachers Overview
+              Learners Overview
             </h3>
             <p className="text-sm text-gray-400 mb-6">
-              Select a teacher to view details
+              Select a learner to view details
             </p>
 
             <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
@@ -227,9 +227,9 @@ export default function AdminDashboard({ onLogout }) {
                 <div className="bg-gray-50 p-6 rounded-full mb-4">
                   <FiUser className="text-5xl text-gray-300" />
                 </div>
-                <h4 className="text-xl font-medium text-gray-500 font-heading">No Teacher Selected</h4>
+                <h4 className="text-xl font-medium text-gray-500 font-heading">No Learner Selected</h4>
                 <p className="text-sm text-gray-400 mt-2 max-w-xs">
-                  Click on a teacher card from the list to view their detailed performance and test history.
+                  Click on a learner card from the list to view their detailed performance and test history.
                 </p>
               </div>
             ) : (
