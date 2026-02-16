@@ -65,7 +65,7 @@ export default function LoginPage() {
       localStorage.setItem("token", token);
 
       if (user.role === "admin") {
-        window.location.href = "/admindashboard";
+        window.location.href = "/";
       } else {
         window.location.href = "/levelsPage";
       }
