@@ -11,7 +11,6 @@ import ffmpegPath from "ffmpeg-static";
 import { Readable, PassThrough } from "stream";
 
 dotenv.config();
-
 connectDB();
 
 const app = express();
@@ -22,75 +21,166 @@ app.use("/test", testRoute);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-// Set ffmpeg path
 ffmpeg.setFfmpegPath(ffmpegPath);
 
-// Helper to convert buffer to PCM
-const convertWebmToPcm = (inputBuffer) => {
+app.get("/",(req,res)=>{
+    res.send("Hello World");
+})
+
+/* =========================
+   GET AUDIO DURATION
+========================= */
+const getAudioDuration = (buffer) => {
     return new Promise((resolve, reject) => {
-        const inputStream = new Readable();
-        inputStream.push(inputBuffer);
-        inputStream.push(null);
+        const stream = new Readable();
+        stream.push(buffer);
+        stream.push(null);
 
-        const chunks = [];
-        const outStream = new PassThrough();
-
-        ffmpeg(inputStream)
-            .inputFormat('webm')
-            .audioFrequency(16000)
-            .audioChannels(1)
-            .audioCodec('pcm_s16le')
-            .format('s16le')
-            .on('error', (err) => reject(err))
-            .pipe(outStream);
-
-        outStream.on('data', (chunk) => chunks.push(chunk));
-        outStream.on('end', () => resolve(Buffer.concat(chunks)));
+        ffmpeg(stream)
+            .inputFormat("webm")
+            .ffprobe((err, metadata) => {
+                if (err) return reject(err);
+                resolve(metadata.format.duration);
+            });
     });
 };
 
+/* =========================
+   SPLIT BUFFER
+========================= */
+const splitBuffer = (buffer, start, duration) => {
+    return new Promise((resolve, reject) => {
 
-// Helper function for Auth
-function getAuthStr(date, config) {
-    let signatureOrigin = `host: ${config.host}\ndate: ${date}\nGET ${config.uri} HTTP/1.1`;
-    let signatureSha = CryptoJS.HmacSHA256(signatureOrigin, config.apiSecret);
-    let signature = CryptoJS.enc.Base64.stringify(signatureSha);
-    let authorizationOrigin = `api_key="${config.apiKey}", algorithm="hmac-sha256", headers="host date request-line", signature="${signature}"`;
-    let authStr = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(authorizationOrigin));
-    return authStr;
-}
+        const inputStream = new Readable();
+        inputStream.push(buffer);
+        inputStream.push(null);
 
+        const chunks = [];
+        const outputStream = new PassThrough();
+
+        ffmpeg(inputStream)
+            .inputFormat("webm")
+            .setStartTime(start)
+            .setDuration(duration)
+            .format("webm")
+            .on("error", reject)
+            .pipe(outputStream);
+
+        outputStream.on("data", (chunk) => chunks.push(chunk));
+        outputStream.on("end", () => resolve(Buffer.concat(chunks)));
+    });
+};
+
+/* =========================
+   CALL LANGUAGE API
+========================= */
+const callEnglishAPI = async (base64, expectedText) => {
+    const response = await fetch(process.env.ENGLISH_API, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "api-key": process.env.API_KEY,
+            "x-user-id": "vamsi"
+        },
+        body: JSON.stringify({
+            audio_base64: base64,
+            expected_text: expectedText,
+            audio_format: "webm"
+        })
+    });
+
+    return response.json();
+};
+
+/* =========================
+   MERGE RESULTS PROPERLY
+========================= */
+const mergeResults = (r1, r2) => {
+
+    const totalTime =
+        (r1.reading?.total_time || 0) +
+        (r2.reading?.total_time || 0);
+
+    const correctWords =
+        (r1.reading?.correct_words_read || 0) +
+        (r2.reading?.correct_words_read || 0);
+
+    const wordsRead =
+        (r1.reading?.words_read || 0) +
+        (r2.reading?.words_read || 0);
+
+    const wpm = totalTime > 0
+        ? (correctWords / totalTime) * 60
+        : 0;
+
+    const accuracy = wordsRead > 0
+        ? (correctWords / wordsRead)
+        : 0;
+
+    return {
+        pronunciation: {
+            overall_score:
+                ((r1.pronunciation?.overall_score || 0) +
+                 (r2.pronunciation?.overall_score || 0)) / 2
+        },
+        fluency: {
+            overall_score:
+                ((r1.fluency?.overall_score || 0) +
+                 (r2.fluency?.overall_score || 0)) / 2
+        },
+        overall: {
+            overall_score:
+                ((r1.overall?.overall_score || 0) +
+                 (r2.overall?.overall_score || 0)) / 2
+        },
+        reading: {
+            total_time: totalTime,
+            correct_words_read: correctWords,
+            words_read: wordsRead,
+            speed_wpm_correct: wpm,
+            accuracy: accuracy
+        }
+    };
+};
+
+/* =========================
+   UPDATED ROUTE
+========================= */
 app.post("/get_result", upload.single("file"), async (req, res) => {
+
     if (!req.file) {
         return res.status(400).send("No file uploaded.");
     }
 
-
-    const fileBuffer=req.file.buffer
-    const buffer=Buffer.from(fileBuffer)
-    const base64=buffer.toString("base64")
     try {
-        const response = await fetch(process.env.ENGLISH_API, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "api-key": process.env.API_KEY,
-                "x-user-id": "vamsi"
-            },
-            body: JSON.stringify({audio_base64:base64,
-            expected_text:req.body.expected_text,audio_format:"webm"})
-        });
+        const duration = await getAudioDuration(req.file.buffer);
 
-        const data = await response.json();
-        console.log(data)
-        res.json(data);
+        // ✅ If <= 2 minutes
+        if (duration <= 120) {
+            const base64 = req.file.buffer.toString("base64");
+            const result = await callEnglishAPI(base64, req.body.expected_text);
+            return res.json(result);
+        }
+
+        // ✅ If > 2 minutes → split
+        const chunk1 = await splitBuffer(req.file.buffer, 0, 120);
+        const chunk2 = await splitBuffer(req.file.buffer, 120, duration - 120);
+
+        const result1 = await callEnglishAPI(chunk1.toString("base64"), req.body.expected_text);
+        const result2 = await callEnglishAPI(chunk2.toString("base64"), req.body.expected_text);
+
+        const merged = mergeResults(result1, result2);
+
+        return res.json(merged);
 
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Server error" });
+        console.error("Processing error:", error);
+        res.status(500).json({ error: "Audio processing failed" });
     }
 });
 
-
+/* =========================
+   SERVER START
+========================= */
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
