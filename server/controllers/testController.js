@@ -101,7 +101,7 @@ const submitResult = async (req, res) => {
         const updatedUser = await User.findById(user_id);
         const currentLevel = updatedUser.level || 1;
         const testsInLevel = updatedUser.tests.filter(t => t.level == currentLevel).length;
-        if(testsInLevel<=15 && result.score>=2){
+        if(testsInLevel<=15 && result.score>=50){
             await User.findByIdAndUpdate(user_id, { 
                 $set: { end_level_day: testsInLevel + 30}
             });

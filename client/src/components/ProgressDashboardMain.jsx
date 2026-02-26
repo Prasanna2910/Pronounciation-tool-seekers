@@ -5,30 +5,52 @@ import { FiArrowLeft, FiCheckCircle, FiAward, FiTrendingUp, FiZap } from 'react-
 function ProgressDashboard({ onBackToLevels, currentUser }) {
 	const [selectedLevel, setSelectedLevel] = useState(null);
 
-	// Mock data - replace with actual data from your backend
-	const progressData = {
-		daysCompleted: 3,
-		levelsCompleted: 0,
-		averageScore: 0,
-		averageReadingSpeed: 0,
-		levelProgress: [
-			{ level: 'beginner', completedDays: [1, 2, 3], tests: [
-				{ day: 1, score: 85, readingSpeed: 120, date: '2024-01-01' },
-				{ day: 2, score: 88, readingSpeed: 125, date: '2024-01-02' },
-				{ day: 3, score: 90, readingSpeed: 130, date: '2024-01-03' },
-			]},
-			{ level: 'expert', completedDays: [], tests: [] },
-			{ level: 'pro', completedDays: [], tests: [] },
-			{ level: 'master', completedDays: [], tests: [] },
-		]
-	};
+	// Level name → numeric id mapping (tests are stored with numeric level)
+	const levelIdMap = { beginner: 1, expert: 2, pro: 3, master: 4 };
 
 	const levels = [
-		{ id: 'beginner', name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
-		{ id: 'expert', name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
-		{ id: 'pro', name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
-		{ id: 'master', name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
+		{ id: 'beginner', name: 'Beginner', numId: 1, color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
+		{ id: 'expert', name: 'Expert', numId: 2, color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
+		{ id: 'pro', name: 'Pro', numId: 3, color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
+		{ id: 'master', name: 'Master', numId: 4, color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
 	];
+
+	// Compute all stats from real user data
+	const allTests = currentUser?.tests || [];
+
+	const levelProgress = levels.map(lvl => {
+		const lvlTests = allTests.filter(t => Number(t.level) === lvl.numId);
+		return {
+			level: lvl.id,
+			numId: lvl.numId,
+			completedDays: lvlTests.map((_, i) => i + 1),
+			tests: lvlTests.map((t, i) => ({
+				day: t.day || i + 1,
+				score: t.score || 0,
+				readingSpeed: t.wpm || t.reading?.speed_wpm_correct || 0,
+				accuracy: t.accuracy || t.reading?.accuracy || 0,
+				wpm: t.wpm || t.reading?.speed_wpm_correct || 0,
+				date: t.date,
+			}))
+		};
+	});
+
+	const totalDays = allTests.length;
+	const levelsCompleted = levelProgress.filter(lp => lp.completedDays.length >= 30).length;
+	const avgScore = totalDays > 0
+		? Math.round(allTests.reduce((s, t) => s + (t.score || 0), 0) / totalDays)
+		: 0;
+	const avgWpm = totalDays > 0
+		? Math.round(allTests.reduce((s, t) => s + (t.wpm || t.reading?.speed_wpm_correct || 0), 0) / totalDays)
+		: 0;
+
+	const progressData = {
+		daysCompleted: totalDays,
+		levelsCompleted,
+		averageScore: avgScore,
+		averageReadingSpeed: avgWpm,
+		levelProgress,
+	};
 
 	const getLevelData = (levelId) => {
 		return progressData.levelProgress.find(lp => lp.level === levelId);
@@ -47,7 +69,7 @@ function ProgressDashboard({ onBackToLevels, currentUser }) {
 							Track your improvement over time
 						</p>
 					</div>
-					<button 
+					<button
 						className="border border-[#e5e7eb] px-4 py-2 rounded-[0.5rem] bg-white text-[#1a1a1a] flex items-center gap-2 shadow-sm hover:bg-gray-50 text-[1rem] font-medium transition-colors"
 						onClick={onBackToLevels}
 					>
@@ -130,11 +152,10 @@ function ProgressDashboard({ onBackToLevels, currentUser }) {
 											key={level.id}
 											onClick={() => setSelectedLevel(level.id)}
 											disabled={!isActive}
-											className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-												selectedLevel === level.id
+											className={`w-full text-left p-4 rounded-xl border-2 transition-all ${selectedLevel === level.id
 													? `${level.borderColor} bg-opacity-10`
 													: 'border-[#e5e7eb] hover:border-gray-300'
-											} ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+												} ${!isActive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
 										>
 											<div className="flex items-center justify-between mb-2">
 												<span className={`font-semibold text-[1.1rem] ${selectedLevel === level.id ? level.textColor : 'text-[#1a1a1a]'}`}>

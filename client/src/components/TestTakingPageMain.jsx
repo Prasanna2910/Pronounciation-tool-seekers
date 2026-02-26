@@ -35,7 +35,7 @@ function TestTakingPage() {
 			const token = localStorage.getItem('token');
 			const userStr = localStorage.getItem('user');
 			const user = JSON.parse(userStr);
-			const res = await axios.get(`https://pronounciation-tool-seekers.onrender.com/test/random/${level}/${user._id}`, {
+			const res = await axios.get(`https://pts-bowm.onrender.com/test/random/${level}/${user._id}`, {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			setTestData(res.data.test);
@@ -152,7 +152,7 @@ function TestTakingPage() {
 
 			// Send to pronunciation API
 			const analysisRes = await axios.post(
-				"https://pronounciation-tool-seekers.onrender.com/get_result",
+				"https://pts-bowm.onrender.com/get_result",
 				formData,
 				{
 					headers: {
@@ -264,13 +264,22 @@ function TestTakingPage() {
 				correctAnswers: correctCount,
 				totalQuestions: testData.questions.length,
 
-				// Reading Metrics
+				// Reading Metrics (flat — for easy access)
 				wpm,
 				accuracy,
 				completion,
 				total_time,
 				correct_words,
 				words_read,
+
+				// Reading Metrics (nested — saved to DB for dashboard)
+				reading: {
+					total_time,
+					correct_words_read: correct_words,
+					words_read,
+					speed_wpm_correct: wpm,
+					accuracy
+				},
 
 				// Meta
 				level,
@@ -286,7 +295,7 @@ function TestTakingPage() {
 			// ========================
 
 			await axios.post(
-				`https://pronounciation-tool-seekers.onrender.com/test/submit/${testId}`,
+				`https://pts-bowm.onrender.com/test/submit/${testId}`,
 				{
 					result: results,
 					user_id: user._id

@@ -1,12 +1,12 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from "./components/landingPage.jsx";
+import LandingPage from "./components/LandingPageMain.jsx";
 import LoginPage from "./components/LoginPage.jsx";
 import AdminDashboard from "./components/AdminDashboard.jsx";
 import AdminTestManagement from "./components/LevelsManagement.jsx";
-import TestTakingPage from "./components/testTakingPage.jsx";
+import TestTakingPage from "./components/TestTakingPageMain.jsx";
 import ResultPage from "./components/ResultPage.jsx";
-import LevelsPage from "./components/LevelsPage.jsx";
+import LevelsPage from "./components/LevelsPageMain.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useEffect, useState } from "react";
 

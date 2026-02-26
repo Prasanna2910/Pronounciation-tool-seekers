@@ -20,12 +20,12 @@ export default function LoginPage() {
       let resp;
 
       if (mode === "login") {
-        resp = await axios.post("https://pronounciation-tool-seekers.onrender.com/user/login", {
+        resp = await axios.post("https://pts-bowm.onrender.com/user/login", {
           email,
           password,
         });
       } else {
-        resp = await axios.post("https://pronounciation-tool-seekers.onrender.com/user/signup", {
+        resp = await axios.post("https://pts-bowm.onrender.com/user/signup", {
           name: fullName,
           email,
           password,
@@ -53,7 +53,7 @@ export default function LoginPage() {
     try {
       const decoded = jwtDecode(credentialResponse.credential);
 
-      const resp = await axios.post("https://pronounciation-tool-seekers.onrender.com/user/google", {
+      const resp = await axios.post("https://pts-bowm.onrender.com/user/google", {
         email: decoded.email,
         name: decoded.name,
       });

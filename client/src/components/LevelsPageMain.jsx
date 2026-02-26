@@ -1,8 +1,8 @@
 import { FiBookOpen, FiLogOut, FiZap, FiAward, FiLock, FiBarChart2, FiCalendar } from 'react-icons/fi';
 import { FaCrown } from 'react-icons/fa';
-import LevelCalendar from './LevelCalendar';
+import LevelCalendar from './LevelCalendarMain';
 import { useNavigate } from "react-router-dom";
-import ProgressDashboard from './ProgressDashboard';
+import ProgressDashboard from './ProgressDashboardMain';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -21,7 +21,7 @@ function LevelsPage({ onLogout }) {
 	const fetchUserProfile = async () => {
 		try {
 			const token = localStorage.getItem('token');
-			const { data } = await axios.get('https://pronounciation-tool-seekers.onrender.com/user/profile', {
+			const { data } = await axios.get('https://pts-bowm.onrender.com/user/profile', {
 				headers: { Authorization: `Bearer ${token}` }
 			});
 			setCurrentUser(data);

@@ -17,7 +17,7 @@ export default function AdminDashboard({ onLogout }) {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const { data } = await axios.get("https://pronounciation-tool-seekers.onrender.com/user/all", {
+      const { data } = await axios.get("https://pts-bowm.onrender.com/user/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const transformed = data.map(u => ({

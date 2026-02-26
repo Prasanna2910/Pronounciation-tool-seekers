@@ -20,7 +20,7 @@ function LevelsManagement() {
     const fetchTests = async () => {
         try {
             const token = localStorage.getItem("token");
-            const res = await axios.get("https://pronounciation-tool-seekers.onrender.com/test/", {
+            const res = await axios.get("https://pts-bowm.onrender.com/test/", {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTests(res.data);
@@ -67,7 +67,7 @@ function LevelsManagement() {
         if (!window.confirm("Are you sure you want to delete this test?")) return;
         try {
             const token = localStorage.getItem("token");
-            await axios.delete(`https://pronounciation-tool-seekers.onrender.com/test/test/${id}`, {
+            await axios.delete(`https://pts-bowm.onrender.com/test/test/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert("Test deleted successfully");
@@ -93,12 +93,12 @@ function LevelsManagement() {
         try {
             const token = localStorage.getItem("token");
             if (newTest._id) {
-                await axios.put(`https://pronounciation-tool-seekers.onrender.com/test/test/${newTest._id}`, newTest, {
+                await axios.put(`https://pts-bowm.onrender.com/test/test/${newTest._id}`, newTest, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 alert("Test updated successfully!");
             } else {
-                await axios.post("https://pronounciation-tool-seekers.onrender.com/test", newTest, {
+                await axios.post("https://pts-bowm.onrender.com/test", newTest, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 alert("Test created successfully!");
