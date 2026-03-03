@@ -8,6 +8,21 @@ const LevelCalendar = ({ level, onClose, userProgress }) => {
 	// Get progress data from props
 	// userProgress is expected to be: { completedDays: [...], tests: [...] }
 	const currentLevelData = userProgress || { completedDays: [], tests: [] };
+	const completedDays = currentLevelData.completedDays || [];
+
+	// Calculate current day based on completed days
+	const currentDay = completedDays.length + 1;
+
+	const levels = [
+		{ id: 1, name: 'Beginner', color: 'bg-green-500', textColor: 'text-green-600', borderColor: 'border-green-500' },
+		{ id: 2, name: 'Expert', color: 'bg-blue-500', textColor: 'text-blue-600', borderColor: 'border-blue-500' },
+		{ id: 3, name: 'Pro', color: 'bg-purple-400', textColor: 'text-purple-600', borderColor: 'border-purple-400' },
+		{ id: 4, name: 'Master', color: 'bg-yellow-400', textColor: 'text-yellow-600', borderColor: 'border-yellow-400' }
+	];
+
+	const totalDays = 30;
+
+	const currentLevelInfo = levels.find(l => l.id === level) || levels[0];
 
 	const handleDayClick = (day) => {
 		if (completedDays.includes(day)) {
@@ -18,6 +33,26 @@ const LevelCalendar = ({ level, onClose, userProgress }) => {
 		}
 	};
 
+	const getDayStatus = (day) => {
+		if (completedDays.includes(day)) return 'completed';
+		if (day === currentDay) return 'current';
+		return 'locked';
+	};
+
+	// Lock icon SVG
+	const LockIcon = ({ size = 16, className = "" }) => (
+		<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+			<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+			<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+		</svg>
+	);
+
+	// X icon SVG
+	const XIcon = ({ size = 28, className = "" }) => (
+		<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+			<line x1="18" y1="6" x2="6" y2="18"></line>
+			<line x1="6" y1="6" x2="18" y2="18"></line>
+		</svg>
 	);
 
 	return (
@@ -196,3 +231,5 @@ const LevelCalendar = ({ level, onClose, userProgress }) => {
 		</>
 	);
 };
+
+export default LevelCalendar;
