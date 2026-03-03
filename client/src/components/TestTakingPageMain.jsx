@@ -7,6 +7,7 @@ function TestTakingPage() {
 	const location = useLocation();
 	const { level, day } = location.state || {};
 
+	const MAX_RECORDING_TIME = 240; // 4 minutes in seconds
 	const [isRecording, setIsRecording] = useState(false);
 	const [recordingTime, setRecordingTime] = useState(0);
 	const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -73,7 +74,18 @@ function TestTakingPage() {
 			setIsRecording(true);
 
 			timerRef.current = setInterval(() => {
-				setRecordingTime(prev => prev + 1);
+				setRecordingTime(prev => {
+					if (prev + 1 >= MAX_RECORDING_TIME) {
+						// Auto-stop at 4 minutes
+						if (mediaRecorderRef.current) {
+							mediaRecorderRef.current.stop();
+						}
+						setIsRecording(false);
+						clearInterval(timerRef.current);
+						return MAX_RECORDING_TIME;
+					}
+					return prev + 1;
+				});
 			}, 1000);
 		} catch (error) {
 			console.error('Error accessing microphone:', error);
@@ -94,6 +106,13 @@ function TestTakingPage() {
 		const secs = seconds % 60;
 		return `${mins}:${secs.toString().padStart(2, '0')}`;
 	};
+
+	// Shows countdown when recording, elapsed time when stopped
+	const displayTime = isRecording
+		? formatTime(MAX_RECORDING_TIME - recordingTime)
+		: formatTime(recordingTime);
+
+	const isTimeWarning = isRecording && (MAX_RECORDING_TIME - recordingTime) <= 30;
 
 	const handleAnswerSelect = (questionId, optionIndex) => {
 		setSelectedAnswers(prev => ({
@@ -366,9 +385,22 @@ function TestTakingPage() {
 						<div className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-bold shadow-lg shadow-indigo-200">
 							Day {day} of 30
 						</div>
-						<div className={`flex items-center gap-2 px-4 py-2 rounded-xl shadow-sm border transition-all ${isRecording ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-200 text-gray-700'}`}>
-							<FiClock className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
-							<span className="font-mono font-bold text-lg w-12 text-center">{formatTime(recordingTime)}</span>
+						{/* Always-visible stopwatch */}
+						<div className={`flex flex-col items-center px-4 py-2 rounded-xl shadow-sm border transition-all ${isTimeWarning
+								? 'bg-red-100 border-red-400 text-red-700'
+								: isRecording
+									? 'bg-red-50 border-red-200 text-red-600'
+									: 'bg-white border-gray-200 text-gray-700'
+							}`}>
+							<div className="flex items-center gap-2">
+								<FiClock className={`w-5 h-5 ${isRecording ? 'animate-pulse' : ''}`} />
+								<span className={`font-mono font-bold text-lg w-16 text-center ${isTimeWarning ? 'animate-pulse' : ''}`}>
+									{displayTime}
+								</span>
+							</div>
+							<span className="text-xs opacity-70 mt-0.5">
+								{isRecording ? 'time left' : recordingTime > 0 ? 'recorded' : '4:00 max'}
+							</span>
 						</div>
 					</div>
 				</div>
